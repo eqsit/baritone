@@ -22,6 +22,7 @@ import baritone.api.IBaritoneProvider;
 import baritone.api.cache.IWorldScanner;
 import baritone.api.command.ICommandSystem;
 import baritone.api.schematic.ISchematicSystem;
+import baritone.api.utils.IBaritoneClientContext;
 import baritone.cache.FasterWorldScanner;
 import baritone.command.CommandSystem;
 import baritone.command.ExampleBaritoneControl;
@@ -65,6 +66,18 @@ public final class BaritoneProvider implements IBaritoneProvider {
         IBaritone baritone = this.getBaritoneForMinecraft(minecraft);
         if (baritone == null) {
             this.all.add(baritone = new Baritone(minecraft));
+        }
+        return baritone;
+    }
+
+    @Override
+    public synchronized IBaritone createBaritone(IBaritoneClientContext context) {
+        if (context == null || context.minecraft() == null) {
+            throw new IllegalArgumentException("context and context.minecraft() must be non-null");
+        }
+        IBaritone baritone = this.getBaritoneForClientContext(context);
+        if (baritone == null) {
+            this.all.add(baritone = new Baritone(context));
         }
         return baritone;
     }

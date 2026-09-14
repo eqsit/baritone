@@ -24,6 +24,7 @@ import baritone.api.behavior.IBehavior;
 import baritone.api.event.listener.IEventBus;
 import baritone.api.process.IBaritoneProcess;
 import baritone.api.process.IElytraProcess;
+import baritone.api.utils.IBaritoneClientContext;
 import baritone.api.utils.IPlayerContext;
 import baritone.behavior.*;
 import baritone.cache.WorldProvider;
@@ -62,6 +63,7 @@ public class Baritone implements IBaritone {
     }
 
     private final Minecraft mc;
+    private volatile IBaritoneClientContext clientContext;
     private final Path directory;
 
     private final GameEventHandler gameEventHandler;
@@ -91,7 +93,15 @@ public class Baritone implements IBaritone {
     public BlockStateInterface bsi;
 
     Baritone(Minecraft mc) {
-        this.mc = mc;
+        this(IBaritoneClientContext.forMinecraft(mc));
+    }
+
+    Baritone(IBaritoneClientContext clientContext) {
+        if (clientContext == null || clientContext.minecraft() == null) {
+            throw new IllegalArgumentException("clientContext and minecraft must be non-null");
+        }
+        this.clientContext = clientContext;
+        this.mc = clientContext.minecraft();
         this.gameEventHandler = new GameEventHandler(this);
 
         this.directory = mc.gameDirectory.toPath().resolve("baritone");
@@ -102,7 +112,7 @@ public class Baritone implements IBaritone {
         }
 
         // Define this before behaviors try and get it, or else it will be null and the builds will fail!
-        this.playerContext = new BaritonePlayerContext(this, mc);
+        this.playerContext = new BaritonePlayerContext(this);
 
         {
             this.lookBehavior         = this.registerBehavior(LookBehavior::new);
@@ -170,6 +180,19 @@ public class Baritone implements IBaritone {
     @Override
     public IPlayerContext getPlayerContext() {
         return this.playerContext;
+    }
+
+    @Override
+    public IBaritoneClientContext getClientContext() {
+        return this.clientContext;
+    }
+
+    @Override
+    public void bindClientContext(IBaritoneClientContext context) {
+        if (context == null || context.minecraft() != this.mc) {
+            throw new IllegalArgumentException("Baritone context must use the same Minecraft instance");
+        }
+        this.clientContext = context;
     }
 
     @Override

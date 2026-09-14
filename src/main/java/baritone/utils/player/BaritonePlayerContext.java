@@ -1,20 +1,6 @@
 /*
  * This file is part of Baritone.
- *
- * Baritone is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Baritone is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Baritone.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package baritone.utils.player;
 
 import baritone.Baritone;
@@ -27,31 +13,28 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 
 /**
- * Implementation of {@link IPlayerContext} that provides information about the primary player.
- *
- * @author Brady
- * @since 11/12/2018
+ * Player context backed by the {@link Baritone}'s bound client context.
+ * The binding may be session-backed, so no player/world/controller lookup in
+ * this class consults Minecraft's mutable global account fields directly.
  */
 public final class BaritonePlayerContext implements IPlayerContext {
 
     private final Baritone baritone;
-    private final Minecraft mc;
     private final IPlayerController playerController;
 
-    public BaritonePlayerContext(Baritone baritone, Minecraft mc) {
+    public BaritonePlayerContext(Baritone baritone) {
         this.baritone = baritone;
-        this.mc = mc;
-        this.playerController = new BaritonePlayerController(mc);
+        this.playerController = new BaritonePlayerController(baritone);
     }
 
     @Override
     public Minecraft minecraft() {
-        return this.mc;
+        return this.baritone.getClientContext().minecraft();
     }
 
     @Override
     public LocalPlayer player() {
-        return this.mc.player;
+        return this.baritone.getClientContext().player();
     }
 
     @Override
@@ -61,7 +44,7 @@ public final class BaritonePlayerContext implements IPlayerContext {
 
     @Override
     public Level world() {
-        return this.mc.level;
+        return this.baritone.getClientContext().world();
     }
 
     @Override
@@ -71,7 +54,7 @@ public final class BaritonePlayerContext implements IPlayerContext {
 
     @Override
     public BetterBlockPos viewerPos() {
-        final Entity entity = this.mc.getCameraEntity();
+        final Entity entity = this.baritone.getClientContext().cameraEntity();
         return entity == null ? this.playerFeet() : BetterBlockPos.from(entity.blockPosition());
     }
 
@@ -82,6 +65,8 @@ public final class BaritonePlayerContext implements IPlayerContext {
 
     @Override
     public HitResult objectMouseOver() {
-        return RayTraceUtils.rayTraceTowards(player(), playerRotations(), playerController().getBlockReachDistance());
+        LocalPlayer player = player();
+        if (player == null) return null;
+        return RayTraceUtils.rayTraceTowards(player, playerRotations(), playerController().getBlockReachDistance());
     }
 }

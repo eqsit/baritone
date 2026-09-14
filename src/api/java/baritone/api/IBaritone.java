@@ -25,6 +25,7 @@ import baritone.api.event.listener.IEventBus;
 import baritone.api.pathing.calc.IPathingControlManager;
 import baritone.api.process.*;
 import baritone.api.selection.ISelectionManager;
+import baritone.api.utils.IBaritoneClientContext;
 import baritone.api.utils.IInputOverrideHandler;
 import baritone.api.utils.IPlayerContext;
 
@@ -120,6 +121,19 @@ public interface IBaritone {
      * @see IPlayerContext
      */
     IPlayerContext getPlayerContext();
+
+    /**
+     * Returns the client/account context bound to this Baritone instance.
+     */
+    IBaritoneClientContext getClientContext();
+
+    /**
+     * Rebinds this Baritone instance to a different account context. Existing
+     * pathing/process state is preserved and immediately observes the new values.
+     * This is primarily intended for clients whose logical player survives a
+     * respawn by replacing the underlying LocalPlayer object in a session holder.
+     */
+    void bindClientContext(IBaritoneClientContext context);
 
     /**
      * @return The {@link IEventBus} instance

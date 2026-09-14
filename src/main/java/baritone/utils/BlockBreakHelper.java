@@ -19,7 +19,6 @@ package baritone.utils;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.utils.IPlayerContext;
-import baritone.utils.accessor.IPlayerControllerMP;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -71,7 +70,7 @@ public final class BlockBreakHelper {
                     // break delay timer only applies for multi-tick block breaks like vanilla
                     breakDelayTimer = BaritoneAPI.getSettings().blockBreakSpeed.value - BASE_BREAK_DELAY;
                     // must reset controller's destroy delay to prevent the client from delaying itself unnecessarily
-                    ((IPlayerControllerMP) ctx.minecraft().gameMode).setDestroyDelay(0);
+                    ctx.playerController().setDestroyDelay(0);
                 }
             }
             // if true, we're breaking a block. if false, we broke the block this tick

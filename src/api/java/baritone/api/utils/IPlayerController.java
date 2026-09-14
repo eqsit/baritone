@@ -55,6 +55,9 @@ public interface IPlayerController {
 
     void setHittingBlock(boolean hittingBlock);
 
+    /** Sets the bound controller's block destroy delay. */
+    void setDestroyDelay(int delay);
+
     default double getBlockReachDistance() {
         return this.getGameType().isCreative() ? 5.0F : BaritoneAPI.getSettings().blockReachDistance.value;
     }

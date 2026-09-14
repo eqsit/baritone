@@ -21,6 +21,7 @@ import baritone.api.cache.IWorldScanner;
 import baritone.api.command.ICommand;
 import baritone.api.command.ICommandSystem;
 import baritone.api.schematic.ISchematicSystem;
+import baritone.api.utils.IBaritoneClientContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.LocalPlayer;
@@ -107,6 +108,25 @@ public interface IBaritoneProvider {
      * @return The {@link IBaritone} instance
      */
     IBaritone createBaritone(Minecraft minecraft);
+
+    /**
+     * Creates and registers a Baritone instance bound to the supplied account
+     * context. Unlike {@link #createBaritone(Minecraft)}, multiple contexts may
+     * share the same Minecraft instance and still receive distinct Baritone
+     * instances. Reusing the exact same context object returns its existing
+     * instance.
+     */
+    IBaritone createBaritone(IBaritoneClientContext context);
+
+    /** Finds a Baritone instance by exact bound context identity. */
+    default IBaritone getBaritoneForClientContext(IBaritoneClientContext context) {
+        for (IBaritone baritone : this.getAllBaritones()) {
+            if (baritone.getClientContext() == context) {
+                return baritone;
+            }
+        }
+        return null;
+    }
 
     /**
      * Destroys and removes the specified {@link IBaritone} instance. If the specified instance is the
